@@ -1,0 +1,65 @@
+package net.minecraft.entity.projectile;
+
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.world.World;
+
+public class EntitySmallFireball extends EntityFireball {
+	public EntitySmallFireball(World worldIn) {
+		super(worldIn);
+		this.setSize(0.3125F, 0.3125F);
+	}
+
+	public EntitySmallFireball(World worldIn, EntityLivingBase shooter, double accelX, double accelY, double accelZ) {
+		super(worldIn, shooter, accelX, accelY, accelZ);
+		this.setSize(0.3125F, 0.3125F);
+	}
+
+	public EntitySmallFireball(World worldIn, double x, double y, double z, double accelX, double accelY,
+			double accelZ) {
+		super(worldIn, x, y, z, accelX, accelY, accelZ);
+		this.setSize(0.3125F, 0.3125F);
+	}
+
+	protected void onImpact(MovingObjectPosition movingobjectposition) {
+		if (!this.worldObj.isRemote) {
+			if (movingobjectposition.entityHit != null) {
+				boolean flag = movingobjectposition.entityHit
+						.attackEntityFrom(DamageSource.causeFireballDamage(this, this.shootingEntity), 5.0F);
+				if (flag) {
+					this.applyEnchantments(this.shootingEntity, movingobjectposition.entityHit);
+					if (!movingobjectposition.entityHit.isImmuneToFire()) {
+						movingobjectposition.entityHit.setFire(5);
+					}
+				}
+			} else {
+				boolean flag1 = true;
+				if (this.shootingEntity != null && this.shootingEntity instanceof EntityLiving) {
+					flag1 = this.worldObj.getGameRules().getBoolean("mobGriefing");
+				}
+
+				if (flag1) {
+					BlockPos blockpos = movingobjectposition.getBlockPos().offset(movingobjectposition.sideHit);
+					if (this.worldObj.isAirBlock(blockpos)) {
+						this.worldObj.setBlockState(blockpos, Blocks.fire.getDefaultState());
+					}
+				}
+			}
+
+			this.setDead();
+		}
+
+	}
+
+	public boolean canBeCollidedWith() {
+		return false;
+	}
+
+	public boolean attackEntityFrom(DamageSource var1, float var2) {
+		return false;
+	}
+}

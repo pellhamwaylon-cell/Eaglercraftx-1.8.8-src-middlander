@@ -1,0 +1,20 @@
+package net.minecraft.world.chunk.storage;
+
+public class NibbleArrayReader {
+	public final byte[] data;
+	private final int depthBits;
+	private final int depthBitsPlusFour;
+
+	public NibbleArrayReader(byte[] dataIn, int depthBitsIn) {
+		this.data = dataIn;
+		this.depthBits = depthBitsIn;
+		this.depthBitsPlusFour = depthBitsIn + 4;
+	}
+
+	public int get(int parInt1, int parInt2, int parInt3) {
+		int i = parInt1 << this.depthBitsPlusFour | parInt3 << this.depthBits | parInt2;
+		int j = i >> 1;
+		int k = i & 1;
+		return k == 0 ? this.data[j] & 15 : this.data[j] >> 4 & 15;
+	}
+}

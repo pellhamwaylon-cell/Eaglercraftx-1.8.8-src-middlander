@@ -1,0 +1,75 @@
+package net.minecraft.block;
+
+import java.util.List;
+
+import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
+
+public class BlockPressurePlate extends BlockBasePressurePlate {
+	public static final PropertyBool POWERED = PropertyBool.create("powered");
+	private final BlockPressurePlate.Sensitivity sensitivity;
+
+	protected BlockPressurePlate(Material materialIn, BlockPressurePlate.Sensitivity sensitivityIn) {
+		super(materialIn);
+		this.setDefaultState(this.blockState.getBaseState().withProperty(POWERED, Boolean.valueOf(false)));
+		this.sensitivity = sensitivityIn;
+	}
+
+	protected int getRedstoneStrength(IBlockState iblockstate) {
+		return ((Boolean) iblockstate.getValue(POWERED)).booleanValue() ? 15 : 0;
+	}
+
+	protected IBlockState setRedstoneStrength(IBlockState iblockstate, int i) {
+		return iblockstate.withProperty(POWERED, Boolean.valueOf(i > 0));
+	}
+
+	protected int computeRedstoneStrength(World world, BlockPos blockpos) {
+		AxisAlignedBB axisalignedbb = this.getSensitiveAABB(blockpos);
+		List<Entity> list;
+		switch (this.sensitivity) {
+		case EVERYTHING:
+			list = world.getEntitiesWithinAABBExcludingEntity((Entity) null, axisalignedbb);
+			break;
+		case MOBS:
+			list = world.getEntitiesWithinAABB(EntityLivingBase.class, axisalignedbb);
+			break;
+		default:
+			return 0;
+		}
+
+		if (!list.isEmpty()) {
+			for (int i = 0, l = list.size(); i < l; ++i) {
+				Entity entity = list.get(i);
+				if (!entity.doesEntityNotTriggerPressurePlate()) {
+					return 15;
+				}
+			}
+		}
+
+		return 0;
+	}
+
+	public IBlockState getStateFromMeta(int i) {
+		return this.getDefaultState().withProperty(POWERED, Boolean.valueOf(i == 1));
+	}
+
+	public int getMetaFromState(IBlockState iblockstate) {
+		return ((Boolean) iblockstate.getValue(POWERED)).booleanValue() ? 1 : 0;
+	}
+
+	protected BlockState createBlockState() {
+		return new BlockState(this, new IProperty[] { POWERED });
+	}
+
+	public static enum Sensitivity {
+		EVERYTHING, MOBS;
+	}
+}
