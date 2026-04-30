@@ -15,15 +15,11 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
 
-      - name: Install Virtual Monitor (Xvfb)
-        run: sudo apt-get update && sudo apt-get install -y xvfb
-
-      - name: Build Middlander Client (Virtual Screen Mode)
+      - name: Force Build (Headless Mode)
         run: |
-          chmod +x *.sh
-          # We run the build inside the virtual screen
-          xvfb-run --auto-servernum ./CompileLatestClient.sh
-
+          # We call the Java compiler directly, bypassing the GUI class
+          java -Djava.awt.headless=true -cp buildtools/BuildTools.jar net.lax1dude.eaglercraft.v1_8.buildtools.CompileLatestClient
+          
       - name: Upload Playable Build
         uses: actions/upload-artifact@v4
         with:
