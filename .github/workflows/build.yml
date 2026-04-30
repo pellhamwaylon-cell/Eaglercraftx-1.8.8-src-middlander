@@ -15,16 +15,14 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
 
-      - name: Diagnostic - Check Workspace
-        run: |
-          echo "Checking for the Source Jar..."
-          ls -R /home/runner/work/Eaglercraftx-1.8.8-src-middlander/Eaglercraftx-1.8.8-src-middlander/ | grep ".jar" || echo "No JARs found!"
+      - name: Install Virtual Monitor (Xvfb)
+        run: sudo apt-get update && sudo apt-get install -y xvfb
 
-      - name: Build Middlander Client
+      - name: Build Middlander Client (Virtual Screen Mode)
         run: |
           chmod +x *.sh
-          # This forces the script to show every single error
-          bash -x ./CompileLatestClient.sh 
+          # We run the build inside the virtual screen
+          xvfb-run --auto-servernum ./CompileLatestClient.sh
 
       - name: Upload Playable Build
         uses: actions/upload-artifact@v4
@@ -34,3 +32,5 @@ jobs:
             stable-dist/
             build/
             dist/
+            javascript/
+            web/
