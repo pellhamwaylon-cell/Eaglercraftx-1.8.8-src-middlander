@@ -24,4 +24,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: middlander-client
-          path: stable-dist/
+          path: |
+            stable-dist/
+            build/
+            dist/
+            javascript/
