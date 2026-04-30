@@ -18,7 +18,13 @@ jobs:
       - name: Build Middlander Client
         run: |
           chmod +x *.sh
-          ./CompileLatestClient.sh
+          # We run the build and ignore errors for a second to see what happens
+          ./CompileLatestClient.sh || echo "Build script finished with issues"
+
+      - name: Diagnostic - List All Files
+        run: |
+          echo "Listing all files to find the output..."
+          find . -maxdepth 3 -not -path '*/.*'
 
       - name: Upload Playable Build
         uses: actions/upload-artifact@v4
@@ -29,3 +35,4 @@ jobs:
             build/
             dist/
             javascript/
+            web/
